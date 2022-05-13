@@ -148,6 +148,29 @@ namespace TodoListApi.Data.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "b3fff3e6-5fed-4533-ba61-d09b1c64c2ff",
+                            ConcurrencyStamp = "0bdc0df2-dc4a-4ffd-a9b7-881c06a6b804",
+                            Name = "Administrator",
+                            NormalizedName = "ADMINISTRATOR"
+                        },
+                        new
+                        {
+                            Id = "68d135ce-00ed-4999-91d7-bf6b4d851b60",
+                            ConcurrencyStamp = "c4b6160b-b0e5-4ffd-b39d-97b8b3886049",
+                            Name = "Moderator",
+                            NormalizedName = "MODERATOR"
+                        },
+                        new
+                        {
+                            Id = "5d909b73-8cc7-40eb-b923-b5b3f09520a5",
+                            ConcurrencyStamp = "23445cab-edd3-4cc9-b2df-47778307475c",
+                            Name = "User",
+                            NormalizedName = "USER"
+                        });
                 });
 
             modelBuilder.Entity("TodoListApi.Data.ApplicationUser", b =>
@@ -213,66 +236,56 @@ namespace TodoListApi.Data.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers");
-                });
 
-            modelBuilder.Entity("TodoListApi.Data.TodoList", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("TodoListDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("TodoList");
-                });
-
-            modelBuilder.Entity("TodoListApi.Data.TodoTask", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTimeOffset>("Deadline")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<bool>("Done")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TodoListId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TodoListId");
-
-                    b.ToTable("TodoTask");
+                    b.HasData(
+                        new
+                        {
+                            Id = "3abf7551-ba26-4adb-842a-ae60fe5bcb13",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "f6b38af1-f112-4727-b5f9-6434af7c1c6b",
+                            Email = "test@user.com",
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            NormalizedEmail = "TEST@USER.COM",
+                            NormalizedUserName = "TESTUSER",
+                            PasswordHash = "AQAAAAEAACcQAAAAEDH98R5KANvUs0fcwGQ4ruet/Uz6+qczxxTXKJ+n7iwYHCYNg2uPGYEkLuE4sXuYgQ==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "036b1c1f-4f42-4f57-92f1-ec0aac1c0168",
+                            TwoFactorEnabled = false,
+                            UserName = "testUser"
+                        },
+                        new
+                        {
+                            Id = "db05223d-9cef-48e6-9c0e-c2dc8bd7d4c1",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "e3715542-d942-45bf-8c94-412efa540152",
+                            Email = "test1@user.com",
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            NormalizedEmail = "TEST1@USER.COM",
+                            NormalizedUserName = "TEST1USER",
+                            PasswordHash = "AQAAAAEAACcQAAAAEG9bQVTZjoEg/R9U+dhD0z3qmY9dA0dsSLPQ3rBQo9r72/8Kk3/q4fCS7KJGqcRl/Q==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "80178ab0-2b35-430e-98dd-3253b3643510",
+                            TwoFactorEnabled = false,
+                            UserName = "test1User"
+                        },
+                        new
+                        {
+                            Id = "f69d3715-2c5e-43ab-9500-bade7ad2c2ee",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "afdf723f-f6c9-428d-a7c2-9361ae282dcf",
+                            Email = "test2@user.com",
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            NormalizedEmail = "TEST2@USER.COM",
+                            NormalizedUserName = "TEST2USER",
+                            PasswordHash = "AQAAAAEAACcQAAAAEN2DgGXdi4YTYFuQqlXPuCGfA6L3yuY4dowZhy13pAJWHn9JX0wlSgRkrrXVvm5zAw==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "fe53765c-fd47-4330-9a92-5d62dfc9fccd",
+                            TwoFactorEnabled = false,
+                            UserName = "test2User"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -324,20 +337,6 @@ namespace TodoListApi.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("TodoListApi.Data.TodoList", b =>
-                {
-                    b.HasOne("TodoListApi.Data.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-                });
-
-            modelBuilder.Entity("TodoListApi.Data.TodoTask", b =>
-                {
-                    b.HasOne("TodoListApi.Data.TodoList", "TodoList")
-                        .WithMany("Tasks")
-                        .HasForeignKey("TodoListId");
                 });
 #pragma warning restore 612, 618
         }

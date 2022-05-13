@@ -5,9 +5,30 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20220513202236_Initial.cs" />
+    <Compile Remove="Migrations\20220513202236_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20220513202444_Initial.cs" />
+    <Compile Remove="Migrations\20220513202444_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20220513202640_Initial.cs" />
+    <Compile Remove="Migrations\20220513202640_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20220513202742_Initial.cs" />
+    <Compile Remove="Migrations\20220513202742_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20220513203252_Initial.cs" />
+    <Compile Remove="Migrations\20220513203252_Initial.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.25" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.25">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.25" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

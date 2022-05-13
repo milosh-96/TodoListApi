@@ -152,6 +152,26 @@ namespace TodoListApi.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { "b3fff3e6-5fed-4533-ba61-d09b1c64c2ff", "0bdc0df2-dc4a-4ffd-a9b7-881c06a6b804", "Administrator", "ADMINISTRATOR" },
+                    { "68d135ce-00ed-4999-91d7-bf6b4d851b60", "c4b6160b-b0e5-4ffd-b39d-97b8b3886049", "Moderator", "MODERATOR" },
+                    { "5d909b73-8cc7-40eb-b923-b5b3f09520a5", "23445cab-edd3-4cc9-b2df-47778307475c", "User", "USER" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetUsers",
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
+                values: new object[,]
+                {
+                    { "3abf7551-ba26-4adb-842a-ae60fe5bcb13", 0, "f6b38af1-f112-4727-b5f9-6434af7c1c6b", "test@user.com", true, false, null, "TEST@USER.COM", "TESTUSER", "AQAAAAEAACcQAAAAEDH98R5KANvUs0fcwGQ4ruet/Uz6+qczxxTXKJ+n7iwYHCYNg2uPGYEkLuE4sXuYgQ==", null, false, "036b1c1f-4f42-4f57-92f1-ec0aac1c0168", false, "testUser" },
+                    { "db05223d-9cef-48e6-9c0e-c2dc8bd7d4c1", 0, "e3715542-d942-45bf-8c94-412efa540152", "test1@user.com", true, false, null, "TEST1@USER.COM", "TEST1USER", "AQAAAAEAACcQAAAAEG9bQVTZjoEg/R9U+dhD0z3qmY9dA0dsSLPQ3rBQo9r72/8Kk3/q4fCS7KJGqcRl/Q==", null, false, "80178ab0-2b35-430e-98dd-3253b3643510", false, "test1User" },
+                    { "f69d3715-2c5e-43ab-9500-bade7ad2c2ee", 0, "afdf723f-f6c9-428d-a7c2-9361ae282dcf", "test2@user.com", true, false, null, "TEST2@USER.COM", "TEST2USER", "AQAAAAEAACcQAAAAEN2DgGXdi4YTYFuQqlXPuCGfA6L3yuY4dowZhy13pAJWHn9JX0wlSgRkrrXVvm5zAw==", null, false, "fe53765c-fd47-4330-9a92-5d62dfc9fccd", false, "test2User" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
