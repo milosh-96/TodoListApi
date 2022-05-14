@@ -10,8 +10,8 @@ namespace TodoListApi.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
     {
-        //public DbSet<TodoList> TodoLists { get; set; }
-        //public DbSet<TodoList> TodoTasks { get; set; }
+        public DbSet<TodoList> TodoLists { get; set; }
+        public DbSet<TodoTask> TodoTasks { get; set; }
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
         }

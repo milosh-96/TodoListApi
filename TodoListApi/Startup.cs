@@ -58,9 +58,9 @@ namespace TodoListApi
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    ValidAudience = Configuration["JWT:ValidAudience"],
-                    ValidIssuer = Configuration["JWT:ValidIssuer"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Secret"]))
+                    ValidAudience = Configuration["Jwt:ValidAudience"],
+                    ValidIssuer = Configuration["Jwt:ValidIssuer"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Secret"]))
                 };
             });
 
@@ -76,6 +76,7 @@ namespace TodoListApi
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseRouting();
 
             app.UseAuthorization();
