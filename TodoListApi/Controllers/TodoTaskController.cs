@@ -30,14 +30,27 @@ namespace TodoListApi.Controllers
 
         // GET: api/<TodoTaskController>
         [HttpGet]
-        public List<TodoTask> Get(string todoListId)
+        public TasksListModel Get(string todoListId,[FromQuery] int page = 1)
         {
             IQueryable<TodoList> initialQuery = _dbContext.TodoLists.Where(x => x.UserId == _userManager.GetUserId(User))
                 .Where(x => x.Id == todoListId);
             if (initialQuery.Any()) {
-                return initialQuery.Include(x => x.Tasks).FirstOrDefault().Tasks;
+                TodoList todoList = new TodoList();
+                todoList = initialQuery.Include(x => x.Tasks).FirstOrDefault();
+                TasksListModel listModel = new TasksListModel();
+                listModel.TodoListId = todoList.Id;
+                listModel.CurrentPage = page;
+                if(listModel.CurrentPage == 1) {
+                    listModel.Tasks = todoList.Tasks.Skip(0).Take(listModel.ItemsPerPage).ToList();
+                }
+                else
+                {
+                    listModel.Tasks = todoList.Tasks.Skip((listModel.CurrentPage-1) * listModel.ItemsPerPage).Take(listModel.ItemsPerPage).ToList();
+                }
+                listModel.TotalPages = (int)Math.Ceiling(decimal.Divide(todoList.Tasks.Count,listModel.ItemsPerPage));
+                return listModel;
             }
-            return new List<TodoTask>();
+            return new TasksListModel();
         }
 
         // GET api/<TodoTaskController>/5
