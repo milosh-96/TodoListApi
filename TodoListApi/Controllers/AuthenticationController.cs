@@ -58,7 +58,7 @@ namespace TodoListApi.Controllers
             List<Claim> claims = new List<Claim>()
                 {
                     new Claim(ClaimTypes.Role,nameof(ApplicationUserRoles.User)),
-                    new Claim(ClaimTypes.NameIdentifier,user.UserName),
+                    new Claim(ClaimTypes.NameIdentifier,user.Id),
                     new Claim(ClaimTypes.Email,user.Email),
                 };
 
@@ -66,7 +66,7 @@ namespace TodoListApi.Controllers
                 _configuration["Jwt:ValidIssuer"],
                 _configuration["Jwt:ValidAudience"],
                 claims,
-                expires: DateTime.UtcNow.AddMinutes(15),
+                expires: DateTime.UtcNow.AddMinutes(60),
                 signingCredentials: credentials
                 );
             return token;

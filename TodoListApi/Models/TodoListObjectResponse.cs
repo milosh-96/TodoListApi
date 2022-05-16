@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
+using TodoListApi.Data;
 
-namespace TodoListApi.Data
+namespace TodoListApi.Models
 {
-    public class TodoList
+    public class TodoListObjectResponse
     {
-        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public string Id { get; set; }
         public string UserId { get; set; }
-        public ApplicationUser User { get; set; }
-
         public string Title { get; set; }
         public string Description { get; set; }
 
