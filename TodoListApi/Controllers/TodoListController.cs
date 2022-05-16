@@ -63,7 +63,7 @@ namespace TodoListApi.Controllers
             TodoList todoList = new TodoList() {
                 Title = request.Title,
                 Description = request.Description,
-                TodoListDate = request.TodoListDate,
+                TodoListDate = DateTime.Parse(request.TodoListDate),
                 UserId=_userManager.GetUserId(User)
             };
             TodoListHttpResponse response = new TodoListHttpResponse();

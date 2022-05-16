@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace TodoListApi.Data
 {
@@ -10,6 +12,8 @@ namespace TodoListApi.Data
 
 
         public string TodoListId { get; set; }
+
+        [JsonIgnore]
         public TodoList TodoList { get; set; }
 
 

@@ -6,18 +6,12 @@ using System.Threading.Tasks;
 
 namespace TodoListApi.Models
 {
-    public class TodoListCreateRequestBody
+    public class TodoTaskCreateRequestBody
     {
-     
         [Required]
-        [StringLength(255,MinimumLength = 2)]
+        [StringLength(255, MinimumLength = 2)]
         public string Title { get; set; }
-
-        public string Description { get; set; }
-
-        public string TodoListDate { get; set; } = DateTime.UtcNow.ToString();
-
+        public string Deadline { get; set; } = DateTimeOffset.Now.AddHours(24).ToString();
         public bool Done { get; set; } = false;
-
     }
 }
