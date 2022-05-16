@@ -39,26 +39,26 @@ namespace TodoListApi.Controllers
 
         // GET api/<TodoListController>/5
         [HttpGet("{id}")]
-        public TodoListHttpResponse Get(string id)
+        public EntityHttpResponse<TodoList> Get(string id)
         {
             IQueryable<TodoList> initialQuery = _dbContext.TodoLists
                 .Where(x => x.UserId == _userManager.GetUserId(User))
                 .Where(x => x.Id == id);
 
             if(initialQuery.Any()) {
-                return new TodoListHttpResponse()
+                return new EntityHttpResponse<TodoList>()
                 {
                     StatusCode = HttpStatusCode.OK,
                     Message = "Item returned.",
-                    TodoList = initialQuery.FirstOrDefault()
+                    Item = initialQuery.FirstOrDefault()
                 };
             }
-            return new TodoListHttpResponse() { StatusCode = HttpStatusCode.NotFound, Message = "Item not found." };
+            return new EntityHttpResponse<TodoList>() { StatusCode = HttpStatusCode.NotFound, Message = "Item not found." };
         }
 
         // POST api/<TodoListController>
         [HttpPost]
-        public TodoListHttpResponse Post([FromBody] TodoListCreateRequestBody request)
+        public EntityHttpResponse<TodoList> Post([FromBody] TodoListCreateRequestBody request)
         {
             TodoList todoList = new TodoList() {
                 Title = request.Title,
@@ -66,13 +66,13 @@ namespace TodoListApi.Controllers
                 TodoListDate = DateTime.Parse(request.TodoListDate),
                 UserId=_userManager.GetUserId(User)
             };
-            TodoListHttpResponse response = new TodoListHttpResponse();
+            EntityHttpResponse<TodoList> response = new EntityHttpResponse<TodoList>();
             _dbContext.TodoLists.Add(todoList);
             if (_dbContext.SaveChanges() > 0)
             {
                 response.StatusCode = HttpStatusCode.Created;
                 response.Message = "TodoList is created.";
-                response.TodoList = todoList;
+                response.Item = todoList;
             }
             else
             {
@@ -85,7 +85,7 @@ namespace TodoListApi.Controllers
 
         // PUT api/<TodoListController>/5
         [HttpPut("{id}")]
-        public TodoListHttpResponse Put(string id, [FromBody] TodoListEditRequestBody request)
+        public EntityHttpResponse<TodoList> Put(string id, [FromBody] TodoListEditRequestBody request)
         {
             IQueryable<TodoList> initialQuery = _dbContext.TodoLists
                 .Where(x => x.UserId == _userManager.GetUserId(User))
@@ -98,13 +98,13 @@ namespace TodoListApi.Controllers
                 todoList.TodoListDate = (request.TodoListDate != null) ? DateTime.Parse(request.TodoListDate) : todoList.TodoListDate;
                 todoList.ModifiedAt = DateTime.UtcNow;
 
-                TodoListHttpResponse response = new TodoListHttpResponse();
+                EntityHttpResponse<TodoList> response = new EntityHttpResponse<TodoList>();
 
                  if (_dbContext.SaveChanges() > 0)
                 {
                     response.StatusCode = HttpStatusCode.OK;
                     response.Message = "TodoList is modified.";
-                    response.TodoList = todoList;
+                    response.Item = todoList;
                 }
                 else
                 {
@@ -113,12 +113,12 @@ namespace TodoListApi.Controllers
                 }
                 return response;
             }
-            return new TodoListHttpResponse() { StatusCode = HttpStatusCode.NotFound, Message = "Item not found" };
+            return new EntityHttpResponse<TodoList>() { StatusCode = HttpStatusCode.NotFound, Message = "Item not found" };
         }
 
         // DELETE api/<TodoListController>/5
         [HttpDelete("{id}")]
-        public TodoListHttpResponse Delete(string id)
+        public EntityHttpResponse<TodoList> Delete(string id)
         {
             IQueryable<TodoList> initialQuery = _dbContext.TodoLists
                .Where(x => x.UserId == _userManager.GetUserId(User))
@@ -129,7 +129,7 @@ namespace TodoListApi.Controllers
 
                 _dbContext.TodoLists.Remove(todoList);
 
-                TodoListHttpResponse response = new TodoListHttpResponse();
+                EntityHttpResponse<TodoList> response = new EntityHttpResponse<TodoList>();
 
                 if (_dbContext.SaveChanges() > 0)
                 {
@@ -143,7 +143,7 @@ namespace TodoListApi.Controllers
                 }
                 return response;
             }
-            return new TodoListHttpResponse() { StatusCode = HttpStatusCode.NotFound, Message = "Item not found" };
+            return new EntityHttpResponse<TodoList>() { StatusCode = HttpStatusCode.NotFound, Message = "Item not found" };
         }
     }
 }
