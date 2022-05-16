@@ -5,5 +5,6 @@ namespace TodoListApi.Data
 {
     public class ApplicationUser : IdentityUser
     {
+        public string TimezoneInfoId { get; set; }
     }
 }
