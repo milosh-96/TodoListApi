@@ -8,6 +8,7 @@ using System.Net;
 using System.Threading.Tasks;
 using TodoListApi.Data;
 using TodoListApi.Models;
+using TodoListApi.Repositories;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,35 +23,36 @@ namespace TodoListApi.Controllers
         private readonly ApplicationDbContext _dbContext;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public TodoListController(ApplicationDbContext dbContext, UserManager<ApplicationUser> userManager)
+        private readonly ITodoListRepository _todoListRepository;
+
+        public TodoListController(ApplicationDbContext dbContext,
+            UserManager<ApplicationUser> userManager, ITodoListRepository todoListRepository)
         {
             _dbContext = dbContext;
             _userManager = userManager;
+            _todoListRepository = todoListRepository;
         }
 
         // GET: api/<TodoListController>
         [HttpGet]
-        public IEnumerable<TodoList> Get()
+        public async Task<List<TodoList>> Get()
         {
-            string userId = _userManager.GetUserId(User);
-            IQueryable<TodoList> initialQuery = _dbContext.TodoLists.Where(x => x.UserId == userId);
-            return initialQuery.ToList();
+            ApplicationUser user = await _userManager.GetUserAsync(User);
+            return _todoListRepository.GetTodoLists(user);
         }
 
         // GET api/<TodoListController>/5
         [HttpGet("{id}")]
-        public EntityHttpResponse<TodoList> Get(string id)
+        public async Task<EntityHttpResponse<TodoList>> Get(string id)
         {
-            IQueryable<TodoList> initialQuery = _dbContext.TodoLists
-                .Where(x => x.UserId == _userManager.GetUserId(User))
-                .Where(x => x.Id == id);
-
-            if(initialQuery.Any()) {
+            ApplicationUser user = await _userManager.GetUserAsync(User);
+            TodoList todoList = _todoListRepository.GetTodoList(id, user);
+            if (todoList != null) {
                 return new EntityHttpResponse<TodoList>()
                 {
                     StatusCode = HttpStatusCode.OK,
                     Message = "Item returned.",
-                    Item = initialQuery.FirstOrDefault()
+                    Item = todoList
                 };
             }
             return new EntityHttpResponse<TodoList>() { StatusCode = HttpStatusCode.NotFound, Message = "Item not found." };
@@ -58,26 +60,22 @@ namespace TodoListApi.Controllers
 
         // POST api/<TodoListController>
         [HttpPost]
-        public EntityHttpResponse<TodoList> Post([FromBody] TodoListCreateRequestBody request)
+        public async Task<EntityHttpResponse<TodoList>> Post([FromBody] TodoListCreateRequestBody request)
         {
-            TodoList todoList = new TodoList() {
-                Title = request.Title,
-                Description = request.Description,
-                TodoListDate = DateTime.Parse(request.TodoListDate),
-                UserId=_userManager.GetUserId(User)
-            };
             EntityHttpResponse<TodoList> response = new EntityHttpResponse<TodoList>();
-            _dbContext.TodoLists.Add(todoList);
-            if (_dbContext.SaveChanges() > 0)
+            
+            try
             {
+                TodoList todoList = _todoListRepository.AddTodoList(request, await _userManager.GetUserAsync(User));
+                _todoListRepository.Save();
                 response.StatusCode = HttpStatusCode.Created;
                 response.Message = "TodoList is created.";
                 response.Item = todoList;
             }
-            else
+            catch(Exception e)
             {
                 response.StatusCode = HttpStatusCode.BadRequest;
-                response.Message = "There was an error.";
+                response.Message = e.Message;
             }
             return response;
 
@@ -85,31 +83,28 @@ namespace TodoListApi.Controllers
 
         // PUT api/<TodoListController>/5
         [HttpPut("{id}")]
-        public EntityHttpResponse<TodoList> Put(string id, [FromBody] TodoListEditRequestBody request)
+        public async Task<EntityHttpResponse<TodoList>> Put(string id, [FromBody] TodoListEditRequestBody request)
         {
             IQueryable<TodoList> initialQuery = _dbContext.TodoLists
                 .Where(x => x.UserId == _userManager.GetUserId(User))
                 .Where(x => x.Id == id);
             if(initialQuery.Any())
             {
-                TodoList todoList = initialQuery.FirstOrDefault();
-                todoList.Title = request.Title ?? todoList.Title;
-                todoList.Description = request.Description ?? todoList.Title;
-                todoList.TodoListDate = (request.TodoListDate != null) ? DateTime.Parse(request.TodoListDate) : todoList.TodoListDate;
-                todoList.ModifiedAt = DateTime.UtcNow;
-
+                
                 EntityHttpResponse<TodoList> response = new EntityHttpResponse<TodoList>();
-
-                 if (_dbContext.SaveChanges() > 0)
-                {
+             
+                try {
+                    ApplicationUser user = await _userManager.GetUserAsync(User);
+                    TodoList todoList = _todoListRepository.UpdateTodoList(id, request, user);
+                    _todoListRepository.Save();
                     response.StatusCode = HttpStatusCode.OK;
                     response.Message = "TodoList is modified.";
                     response.Item = todoList;
                 }
-                else
+                catch(Exception e)
                 {
                     response.StatusCode = HttpStatusCode.BadRequest;
-                    response.Message = "There was an error.";
+                    response.Message = e.Message;
                 }
                 return response;
             }
@@ -118,28 +113,29 @@ namespace TodoListApi.Controllers
 
         // DELETE api/<TodoListController>/5
         [HttpDelete("{id}")]
-        public EntityHttpResponse<TodoList> Delete(string id)
+        public async Task<EntityHttpResponse<TodoList>> Delete(string id)
         {
             IQueryable<TodoList> initialQuery = _dbContext.TodoLists
                .Where(x => x.UserId == _userManager.GetUserId(User))
                .Where(x => x.Id == id);
             if (initialQuery.Any())
             {
-                TodoList todoList = initialQuery.FirstOrDefault();
-
-                _dbContext.TodoLists.Remove(todoList);
+               
 
                 EntityHttpResponse<TodoList> response = new EntityHttpResponse<TodoList>();
 
-                if (_dbContext.SaveChanges() > 0)
+                try 
                 {
+                    ApplicationUser user = await _userManager.GetUserAsync(User);
+                    _todoListRepository.DeleteTodoList(id, user);
+                    _todoListRepository.Save();
                     response.StatusCode = HttpStatusCode.OK;
                     response.Message = "TodoList is deleted.";
                 }
-                else
+                catch(Exception e)
                 {
                     response.StatusCode = HttpStatusCode.BadRequest;
-                    response.Message = "There was an error.";
+                    response.Message = e.Message;
                 }
                 return response;
             }

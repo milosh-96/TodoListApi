@@ -9,6 +9,7 @@ using System.Net;
 using System.Threading.Tasks;
 using TodoListApi.Data;
 using TodoListApi.Models;
+using TodoListApi.Repositories;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -21,22 +22,25 @@ namespace TodoListApi.Controllers
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ITodoTaskRepository _todoTaskRepository;
+        private readonly ITodoListRepository _todoListRepository;
 
-        public TodoTaskController(ApplicationDbContext dbContext, UserManager<ApplicationUser> userManager)
+        public TodoTaskController(ApplicationDbContext dbContext, UserManager<ApplicationUser> userManager, ITodoTaskRepository todoTaskRepository, ITodoListRepository todoListRepository)
         {
             _dbContext = dbContext;
             _userManager = userManager;
+            _todoTaskRepository = todoTaskRepository;
+            _todoListRepository = todoListRepository;
         }
 
         // GET: api/<TodoTaskController>
         [HttpGet]
-        public TasksListModel Get(string todoListId,[FromQuery] int page = 1)
+        public async Task<TasksListModel> Get(string todoListId,[FromQuery] int page = 1)
         {
-            IQueryable<TodoList> initialQuery = _dbContext.TodoLists.Where(x => x.UserId == _userManager.GetUserId(User))
-                .Where(x => x.Id == todoListId);
-            if (initialQuery.Any()) {
-                TodoList todoList = new TodoList();
-                todoList = initialQuery.Include(x => x.Tasks).FirstOrDefault();
+            ApplicationUser user = await _userManager.GetUserAsync(User);
+            TodoList todoList = _todoListRepository.GetTodoListWithTasks(todoListId, user);
+            if (todoList != null) {
+               
                 TasksListModel listModel = new TasksListModel();
                 listModel.TodoListId = todoList.Id;
                 listModel.CurrentPage = page;
@@ -55,12 +59,12 @@ namespace TodoListApi.Controllers
 
         // GET api/<TodoTaskController>/5
         [HttpGet("{id}")]
-        public EntityHttpResponse<TodoTask> Get(string id,string todoListId)
+        public async Task<EntityHttpResponse<TodoTask>> Get(string id,string todoListId)
         {
-            IQueryable<TodoTask> initialQuery = _dbContext.TodoTasks.Where(x => x.TodoListId == todoListId).Where(x => x.Id == id);
-            if(initialQuery.Any()) { 
+            ApplicationUser user = await _userManager.GetUserAsync(User);
+            TodoTask todoTask = _todoTaskRepository.GetTodoTask(id, _todoListRepository.GetTodoList(todoListId), user);
+            if(todoTask != null) { 
                 EntityHttpResponse<TodoTask> response = new EntityHttpResponse<TodoTask>();
-                TodoTask todoTask = initialQuery.FirstOrDefault();
                 response.StatusCode = HttpStatusCode.OK;
                 response.Item = todoTask;
                 return response;

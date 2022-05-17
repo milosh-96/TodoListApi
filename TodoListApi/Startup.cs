@@ -16,6 +16,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TodoListApi.Data;
+using TodoListApi.Repositories;
 
 namespace TodoListApi
 {
@@ -63,6 +64,9 @@ namespace TodoListApi
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Secret"]))
                 };
             });
+
+            services.AddScoped<ITodoListRepository, TodoListRepository>();
+            services.AddScoped<ITodoTaskRepository, TodoTaskRepository>();
 
         }
 

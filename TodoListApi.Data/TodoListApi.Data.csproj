@@ -17,6 +17,10 @@
     <Compile Remove="Migrations\20220513203252_Initial.Designer.cs" />
     <Compile Remove="Migrations\20220514185028_AddTodoTasksTables.cs" />
     <Compile Remove="Migrations\20220514185028_AddTodoTasksTables.Designer.cs" />
+    <Compile Remove="Migrations\20220517163612_AddCompletedTasksTable.cs" />
+    <Compile Remove="Migrations\20220517163612_AddCompletedTasksTable.Designer.cs" />
+    <Compile Remove="Migrations\20220517163807_AddCompletedTasksTable.cs" />
+    <Compile Remove="Migrations\20220517163807_AddCompletedTasksTable.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
