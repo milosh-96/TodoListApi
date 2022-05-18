@@ -75,41 +75,26 @@ namespace TodoListApi.Controllers
 
         // POST api/<TodoTaskController>
         [HttpPost]
-        public EntityHttpResponse<TodoTask> Post(string todoListId, [FromBody] TodoTaskCreateRequestBody request)
+        public async Task<EntityHttpResponse<TodoTask>> Post(string todoListId, [FromBody] TodoTaskCreateRequestBody request)
         {
-            IQueryable<TodoList> initialTodoListQuery = _dbContext.TodoLists
-                .Where(u => u.UserId == _userManager.GetUserId(User))
-                .Where(t => t.Id == todoListId);
+            ApplicationUser user = await _userManager.GetUserAsync(User);
             // check if todo list exists and does that list belongs to current user //
-            if (initialTodoListQuery.Any())
+                 TodoList todoList = _todoListRepository.GetTodoListWithTasks(todoListId, user);
+            if (todoList != null)
             {
                 EntityHttpResponse<TodoTask> response = new EntityHttpResponse<TodoTask>();
-                TodoList todoList = initialTodoListQuery.Include(x => x.Tasks).FirstOrDefault();
-                TodoTask todoTask = new TodoTask();
-                todoTask.Title = request.Title;
-                todoTask.Done = request.Done;
                 try
                 {
-                    todoTask.Deadline = (request.Deadline != null) ? DateTimeOffset.Parse(request.Deadline) : todoTask.Deadline;
-                }
-                catch (Exception e)
-                {
-                    response.StatusCode = HttpStatusCode.BadRequest;
-                    response.Message = e.Message;
-                    return response;
-                }
-
-                todoList.Tasks.Add(todoTask);
-                if (_dbContext.SaveChanges() > 0)
-                {
+                    TodoTask todoTask = _todoTaskRepository.AddTodoTask(todoList, user, request);
+                    _todoTaskRepository.Save();
                     response.StatusCode = HttpStatusCode.Created;
                     response.Message = "Todo task is created.";
                     response.Item = todoTask;
                 }
-                else
+                catch(Exception e)
                 {
                     response.StatusCode = HttpStatusCode.BadRequest;
-                    response.Message = "Error happened.";
+                    response.Message =e.Message;
                 }
                 return response;
 
@@ -123,44 +108,26 @@ namespace TodoListApi.Controllers
 
         // PUT api/<TodoTaskController>/5
         [HttpPut("{id}")]
-        public EntityHttpResponse<TodoTask> Put(string id, string todoListId, [FromBody] TodoTaskEditRequestBody request)
+        public async Task<EntityHttpResponse<TodoTask>> Put(string id, string todoListId, [FromBody] TodoTaskEditRequestBody request)
         {
-            IQueryable<TodoList> initialTodoListQuery = _dbContext.TodoLists
-                .Where(u => u.UserId == _userManager.GetUserId(User))
-                .Where(t => t.Id == todoListId);
+            ApplicationUser user = await _userManager.GetUserAsync(User);
+            TodoList todoList = _todoListRepository.GetTodoList(todoListId, user);
             // check if todo list exists and does that list belongs to current user //
-            if (initialTodoListQuery.Any())
+            if (todoList != null)
             {
                 EntityHttpResponse<TodoTask> response = new EntityHttpResponse<TodoTask>();
-
-                TodoList todoList = initialTodoListQuery.Include(x => x.Tasks).FirstOrDefault();
-                TodoTask todoTask = todoList.Tasks.Where(x => x.Id == id).FirstOrDefault();
-                todoTask.Title = request.Title ?? todoTask.Title;
-                todoTask.Done = (request.Done != null) ? request.Done.Value : todoTask.Done;
                 try
                 {
-                    todoTask.Deadline = (request.Deadline != null) ? DateTimeOffset.Parse(request.Deadline) : todoTask.Deadline;
-                }
-                catch (Exception e)
-                {
-                    response.StatusCode = HttpStatusCode.BadRequest;
-                    response.Message = e.Message;
-                    return response;
-                }
-                todoTask.ModifiedAt = DateTime.UtcNow;
-
-
-                todoList.Tasks.Add(todoTask);
-                if (_dbContext.SaveChanges() > 0)
-                {
+                    TodoTask todoTask = _todoTaskRepository.EditTodoTask(id, todoList, user, request);
+                    _todoTaskRepository.Save();
                     response.StatusCode = HttpStatusCode.Created;
                     response.Message = "Todo task is modified.";
                     response.Item = todoTask;
                 }
-                else
+                catch(Exception e)
                 {
                     response.StatusCode = HttpStatusCode.BadRequest;
-                    response.Message = "Error happened.";
+                    response.Message = e.Message;
                 }
                 return response;
 
@@ -174,28 +141,26 @@ namespace TodoListApi.Controllers
 
         // DELETE api/<TodoTaskController>/5
         [HttpDelete("{id}")]
-        public EntityHttpResponse<TodoTask> Delete(string id, string todoListId)
+        public async Task<EntityHttpResponse<TodoTask>> Delete(string id, string todoListId)
         {
-            IQueryable<TodoList> initialTodoListQuery = _dbContext.TodoLists
-              .Where(u => u.UserId == _userManager.GetUserId(User))
-              .Where(t => t.Id == todoListId);
+            ApplicationUser user = await _userManager.GetUserAsync(User);
+            TodoList todoList = _todoListRepository.GetTodoList(todoListId, user);
             // check if todo list exists and does that list belongs to current user //
-            if (initialTodoListQuery.Any())
+            if (todoList != null)
             {
                 EntityHttpResponse<TodoTask> response = new EntityHttpResponse<TodoTask>();
 
-                TodoList todoList = initialTodoListQuery.Include(x => x.Tasks).FirstOrDefault();
-                TodoTask todoTask = todoList.Tasks.Where(x => x.Id == id).FirstOrDefault();
-                _dbContext.TodoTasks.Remove(todoTask);
-                if (_dbContext.SaveChanges() > 0)
+                try
                 {
+                    _todoTaskRepository.DeleteTodoTask(id, todoList, user);
+                    _todoTaskRepository.Save();
                     response.StatusCode = HttpStatusCode.OK;
                     response.Message = "TodoTask is deleted.";
                 }
-                else
+                catch(Exception e)
                 {
                     response.StatusCode = HttpStatusCode.BadRequest;
-                    response.Message = "There was an error.";
+                    response.Message = e.Message;
                 }
                 return response;
             }

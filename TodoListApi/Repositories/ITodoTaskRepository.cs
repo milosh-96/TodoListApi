@@ -20,6 +20,8 @@ namespace TodoListApi.Repositories
         public TodoTask AddTodoTask(TodoList todoList,ApplicationUser user,TodoTaskCreateRequestBody requestBody);
         public TodoTask EditTodoTask(string id, TodoList todoList, ApplicationUser user, TodoTaskEditRequestBody requestBody);
 
+        public void DeleteTodoTask(string id, TodoList todoList, ApplicationUser user);
+
         public void UpdateTaskStatus(string id, TodoList todoList, ApplicationUser user, bool taskStatus);
     }
 }

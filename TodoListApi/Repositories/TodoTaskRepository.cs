@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,42 +19,97 @@ namespace TodoListApi.Repositories
 
         public TodoTask AddTodoTask(TodoList todoList, ApplicationUser user, TodoTaskCreateRequestBody requestBody)
         {
-            throw new NotImplementedException();
+            if (todoList != null)
+            {
+                TodoTask todoTask = new TodoTask();
+                todoTask.Title = requestBody.Title;
+                todoTask.Done = requestBody.Done;
+                todoTask.TodoListId = todoList.Id;
+                try
+                {
+                    todoTask.Deadline = DateTimeOffset.Parse(requestBody.Deadline);
+                }
+                catch (Exception e)
+                {
+                    todoTask.Deadline = DateTimeOffset.UtcNow;
+                }
+                _dbContext.TodoTasks.Add(todoTask);
+                return todoTask;
+            }
+            return null;
+        }
+
+        public void DeleteTodoTask(string id, TodoList todoList, ApplicationUser user)
+        {
+            TodoTask todoTask = this.GetTodoTask(id, todoList, user);
+            if(todoTask != null)
+            {
+                _dbContext.TodoTasks.Remove(todoTask);
+            }
         }
 
         public TodoTask EditTodoTask(string id, TodoList todoList, ApplicationUser user, TodoTaskEditRequestBody requestBody)
         {
-            throw new NotImplementedException();
+            TodoTask todoTask = this.GetTodoTask(id, todoList, user);
+            if(todoTask != null)
+            {
+                todoTask.Title = requestBody.Title ?? todoTask.Title;
+                todoTask.Done = (requestBody.Done != null) ? requestBody.Done.Value : todoTask.Done;
+                try
+                {
+                    todoTask.Deadline = DateTimeOffset.Parse(requestBody.Deadline);
+                }
+                catch(Exception e)
+                {
+                    todoTask.Deadline = todoTask.Deadline;
+                }
+                todoTask.ModifiedAt = DateTime.UtcNow;
+                _dbContext.TodoTasks.Update(todoTask);
+                return todoTask;
+            }
+            return null;
         }
 
         public TodoTask GetTodoTask(string id)
         {
-            throw new NotImplementedException();
+            return _dbContext.TodoTasks.Where(x => x.Id == id).FirstOrDefault();
         }
 
         public TodoTask GetTodoTask(string id, TodoList todoList)
         {
-            throw new NotImplementedException();
+            return _dbContext.TodoTasks.Where(x => x.Id == id).Where(t => t.TodoListId == todoList.Id).FirstOrDefault();
         }
 
+        // get todolist task and ensure it belongs to the user's todolist
         public TodoTask GetTodoTask(string id, TodoList todoList, ApplicationUser user)
         {
-            throw new NotImplementedException();
+            if (todoList.UserId == user.Id)
+            {
+                if (todoList.Tasks != null && todoList.Tasks.Count > 0)
+                {
+                    return todoList.Tasks.Where(x => x.Id == id).FirstOrDefault();
+                }
+            }
+            return null;
         }
 
         public List<TodoTask> GetTodoTasks(TodoList todoList)
         {
-            throw new NotImplementedException();
+            return _dbContext.TodoTasks.Where(x => x.TodoListId == todoList.Id).ToList();
         }
 
         public List<TodoTask> GetTodoTasks(TodoList todoList, ApplicationUser user)
         {
-            throw new NotImplementedException();
+            return _dbContext.TodoTasks
+                .Include(x=>x.TodoList)
+                .Where(x => x.TodoListId == todoList.Id)
+                .Where(t=>t.TodoList.UserId==user.Id)
+                .ToList();
         }
 
         public void Save()
         {
-            throw new NotImplementedException();
+            _dbContext.SaveChanges();
         }
 
         public void UpdateTaskStatus(string id, TodoList todoList, ApplicationUser user, bool taskStatus)

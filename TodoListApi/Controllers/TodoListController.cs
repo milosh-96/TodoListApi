@@ -85,17 +85,14 @@ namespace TodoListApi.Controllers
         [HttpPut("{id}")]
         public async Task<EntityHttpResponse<TodoList>> Put(string id, [FromBody] TodoListEditRequestBody request)
         {
-            IQueryable<TodoList> initialQuery = _dbContext.TodoLists
-                .Where(x => x.UserId == _userManager.GetUserId(User))
-                .Where(x => x.Id == id);
-            if(initialQuery.Any())
+            ApplicationUser user = await _userManager.GetUserAsync(User);
+            TodoList todoList = _todoListRepository.GetTodoList(id, user);
+            if(todoList != null)
             {
-                
                 EntityHttpResponse<TodoList> response = new EntityHttpResponse<TodoList>();
-             
                 try {
-                    ApplicationUser user = await _userManager.GetUserAsync(User);
-                    TodoList todoList = _todoListRepository.UpdateTodoList(id, request, user);
+                    
+                    todoList = _todoListRepository.UpdateTodoList(id, request, user);
                     _todoListRepository.Save();
                     response.StatusCode = HttpStatusCode.OK;
                     response.Message = "TodoList is modified.";
@@ -115,18 +112,13 @@ namespace TodoListApi.Controllers
         [HttpDelete("{id}")]
         public async Task<EntityHttpResponse<TodoList>> Delete(string id)
         {
-            IQueryable<TodoList> initialQuery = _dbContext.TodoLists
-               .Where(x => x.UserId == _userManager.GetUserId(User))
-               .Where(x => x.Id == id);
-            if (initialQuery.Any())
+            ApplicationUser user = await _userManager.GetUserAsync(User);
+            TodoList todoList = _todoListRepository.GetTodoList(id, user);
+            if (todoList != null)
             {
-               
-
                 EntityHttpResponse<TodoList> response = new EntityHttpResponse<TodoList>();
-
                 try 
                 {
-                    ApplicationUser user = await _userManager.GetUserAsync(User);
                     _todoListRepository.DeleteTodoList(id, user);
                     _todoListRepository.Save();
                     response.StatusCode = HttpStatusCode.OK;
