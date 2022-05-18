@@ -24,13 +24,15 @@ namespace TodoListApi.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
 
         private readonly ITodoListRepository _todoListRepository;
+        private readonly ICompletedTaskRepository _completedTaskRepository;
 
         public TodoListController(ApplicationDbContext dbContext,
-            UserManager<ApplicationUser> userManager, ITodoListRepository todoListRepository)
+            UserManager<ApplicationUser> userManager, ITodoListRepository todoListRepository, ICompletedTaskRepository completedTaskRepository)
         {
             _dbContext = dbContext;
             _userManager = userManager;
             _todoListRepository = todoListRepository;
+            _completedTaskRepository = completedTaskRepository;
         }
 
         // GET: api/<TodoListController>

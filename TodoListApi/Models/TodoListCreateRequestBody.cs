@@ -17,7 +17,6 @@ namespace TodoListApi.Models
 
         public string TodoListDate { get; set; } = DateTime.UtcNow.ToString();
 
-        public bool Done { get; set; } = false;
 
     }
 }

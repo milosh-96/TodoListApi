@@ -67,6 +67,7 @@ namespace TodoListApi
 
             services.AddScoped<ITodoListRepository, TodoListRepository>();
             services.AddScoped<ITodoTaskRepository, TodoTaskRepository>();
+            services.AddScoped<ICompletedTaskRepository, CompletedTaskRepository>();
 
         }
 

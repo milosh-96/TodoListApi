@@ -41,7 +41,7 @@ namespace TodoListApi.Repositories
             }
             catch(Exception e)
             {
-                
+                todoList.TodoListDate = todoList.TodoListDate;
             }
             return todoList;
         }

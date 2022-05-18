@@ -64,7 +64,7 @@ namespace TodoListApi.Repositories
                     todoTask.Deadline = todoTask.Deadline;
                 }
                 todoTask.ModifiedAt = DateTime.UtcNow;
-                _dbContext.TodoTasks.Update(todoTask);
+                
                 return todoTask;
             }
             return null;
@@ -85,10 +85,7 @@ namespace TodoListApi.Repositories
         {
             if (todoList.UserId == user.Id)
             {
-                if (todoList.Tasks != null && todoList.Tasks.Count > 0)
-                {
-                    return todoList.Tasks.Where(x => x.Id == id).FirstOrDefault();
-                }
+                return _dbContext.TodoTasks.Include(x => x.TodoList).Where(x => x.TodoListId == todoList.Id).Where(x => x.Id == id).FirstOrDefault();
             }
             return null;
         }

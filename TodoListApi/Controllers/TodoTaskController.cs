@@ -24,13 +24,15 @@ namespace TodoListApi.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ITodoTaskRepository _todoTaskRepository;
         private readonly ITodoListRepository _todoListRepository;
+        private readonly ICompletedTaskRepository _completedTaskRepository;
 
-        public TodoTaskController(ApplicationDbContext dbContext, UserManager<ApplicationUser> userManager, ITodoTaskRepository todoTaskRepository, ITodoListRepository todoListRepository)
+        public TodoTaskController(ApplicationDbContext dbContext, UserManager<ApplicationUser> userManager, ITodoTaskRepository todoTaskRepository, ITodoListRepository todoListRepository, ICompletedTaskRepository completedTaskRepository)
         {
             _dbContext = dbContext;
             _userManager = userManager;
             _todoTaskRepository = todoTaskRepository;
             _todoListRepository = todoListRepository;
+            _completedTaskRepository = completedTaskRepository;
         }
 
         // GET: api/<TodoTaskController>
@@ -87,6 +89,10 @@ namespace TodoListApi.Controllers
                 {
                     TodoTask todoTask = _todoTaskRepository.AddTodoTask(todoList, user, request);
                     _todoTaskRepository.Save();
+                    if(request.Done == true)
+                    {
+                        _completedTaskRepository.AddCompletedTask(todoTask);
+                    }
                     response.StatusCode = HttpStatusCode.Created;
                     response.Message = "Todo task is created.";
                     response.Item = todoTask;
@@ -120,6 +126,19 @@ namespace TodoListApi.Controllers
                 {
                     TodoTask todoTask = _todoTaskRepository.EditTodoTask(id, todoList, user, request);
                     _todoTaskRepository.Save();
+                    if (request.Done == true)
+                    {
+                        _completedTaskRepository.AddCompletedTask(todoTask);
+                        _completedTaskRepository.Save();
+                    }
+                    else
+                    {
+                        CompletedTaskUser completedTask = _completedTaskRepository.GetCompletedTaskByTodoTask(todoTask);
+                        if(completedTask!=null){
+                            _completedTaskRepository.DeleteCompletedTask(completedTask.Id);
+                            _completedTaskRepository.Save();
+                        }
+                    }
                     response.StatusCode = HttpStatusCode.Created;
                     response.Message = "Todo task is modified.";
                     response.Item = todoTask;
