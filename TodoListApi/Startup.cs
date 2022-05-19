@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +34,7 @@ namespace TodoListApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
 
             // For Entity Framework  
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("Default")));
@@ -64,7 +66,14 @@ namespace TodoListApi
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Secret"]))
                 };
             });
+            
+            
+            //adding swagger //
+            services.AddSwaggerGen(config=> {
+                config.SwaggerDoc("v1", new OpenApiInfo() { Title = "TodoList API Browser", Version = "v1" });
+            });
 
+            //adding custom repositories //
             services.AddScoped<ITodoListRepository, TodoListRepository>();
             services.AddScoped<ITodoTaskRepository, TodoTaskRepository>();
             services.AddScoped<ICompletedTaskRepository, CompletedTaskRepository>();
@@ -82,6 +91,16 @@ namespace TodoListApi
             app.UseHttpsRedirection();
 
             app.UseAuthentication();
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.)
+            app.UseSwaggerUI(config=> {
+                config.SwaggerEndpoint("/swagger/v1/swagger.json", "TodoList API V1");
+                config.RoutePrefix = string.Empty;
+            });
+
             app.UseRouting();
 
             app.UseAuthorization();
