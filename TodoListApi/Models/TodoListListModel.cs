@@ -1,17 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using TodoListApi.Data;
 
 namespace TodoListApi.Models
 {
-    public class TasksListModel
+    public class TodoListsListModel
     {
-        public string TodoListId { get; set; }
-        public List<TodoTask> Tasks { get; set; }
+        public List<TodoList> Lists { get; set; }
+
+        [StringLength(200, MinimumLength = 2)]
 
         public string FilterBy { get; set; }
+
+        [StringLength(200,MinimumLength = 2)]
         public string FilterQuery { get; set; }
         public int TotalPages { get; set; } = 1;
         public int ItemsPerPage { get; set; } = 10;
@@ -21,11 +25,9 @@ namespace TodoListApi.Models
 
 
     }
-    public static class TasksListModelFilters
+    public static class TodoListsListModelFilters
     {
-        public static string Done { get; set; } = "Done";
-        public static string Deadline { get; set; } = "Deadline";
+        public static string TodoListDate { get; set; } = "TodoListDate";
+        public static string Title { get; set; } = "Title";
     }
-
-
 }

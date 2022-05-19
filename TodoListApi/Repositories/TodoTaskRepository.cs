@@ -33,7 +33,7 @@ namespace TodoListApi.Repositories
                 {
                     todoTask.Deadline = DateTimeOffset.UtcNow;
                 }
-                _dbContext.TodoTasks.Add(todoTask);
+                todoTask.Deadline = TimeZoneInfo.ConvertTime(todoTask.Deadline, TimeZoneInfo.FindSystemTimeZoneById(user.TimezoneInfoId));                _dbContext.TodoTasks.Add(todoTask);
                 return todoTask;
             }
             return null;
@@ -63,6 +63,7 @@ namespace TodoListApi.Repositories
                 {
                     todoTask.Deadline = todoTask.Deadline;
                 }
+                todoTask.Deadline = TimeZoneInfo.ConvertTime(todoTask.Deadline, TimeZoneInfo.FindSystemTimeZoneById(user.TimezoneInfoId));
                 todoTask.ModifiedAt = DateTime.UtcNow;
                 
                 return todoTask;

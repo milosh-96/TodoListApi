@@ -37,10 +37,44 @@ namespace TodoListApi.Controllers
 
         // GET: api/<TodoListController>
         [HttpGet]
-        public async Task<List<TodoList>> Get()
+        public async Task<TodoListsListModel> Get([FromQuery]TodoListsListModel request)
         {
             ApplicationUser user = await _userManager.GetUserAsync(User);
-            return _todoListRepository.GetTodoLists(user);
+
+            TodoListsListModel listModel = request ?? new TodoListsListModel();
+            List<TodoList> lists = _todoListRepository.GetTodoLists(user);
+            switch(request.FilterBy)
+            {
+                case nameof(TodoListsListModelFilters.Title):
+                    lists = lists.Where(x => x.Title.StartsWith(request.FilterQuery,StringComparison.InvariantCultureIgnoreCase)).ToList();
+                    break; 
+                case nameof(TodoListsListModelFilters.TodoListDate):
+                    DateTime? filterDate = null;
+                    try
+                    {
+                        filterDate = DateTime.Parse(request.FilterQuery);
+                        lists = lists.Where(x =>
+                            x.TodoListDate.Date == filterDate.Value.Date
+                            ).ToList();
+                    }
+                    catch(Exception e)
+                    {
+                        // filterby will ignore bad date and ignore return results without filtering
+                        listModel.Errors.Add(e.Message);
+                    }
+                    break;
+            }
+            if (listModel.CurrentPage == 1)
+            {
+                listModel.Lists = lists.Skip(0).Take(listModel.ItemsPerPage).ToList();
+            }
+            else
+            {
+                listModel.Lists = lists.Skip((listModel.CurrentPage - 1) * listModel.ItemsPerPage).Take(listModel.ItemsPerPage).ToList();
+            }
+            listModel.TotalPages = (int)Math.Ceiling(decimal.Divide(lists.Count, listModel.ItemsPerPage));
+            return listModel;
+
         }
 
         // GET api/<TodoListController>/5
