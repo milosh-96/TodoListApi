@@ -155,20 +155,7 @@ namespace TodoListApi.Controllers
                 {
                     TodoTask todoTask = _todoTaskRepository.EditTodoTask(id, todoList, user, request);
                     _todoTaskRepository.Save();
-                    if (request.Done == true)
-                    {
-                        _completedTaskRepository.AddCompletedTask(todoTask);
-                        _completedTaskRepository.Save();
-                    }
-                    else
-                    {
-                        CompletedTaskUser completedTask = _completedTaskRepository.GetCompletedTaskByTodoTask(todoTask);
-                        if (completedTask != null)
-                        {
-                            _completedTaskRepository.DeleteCompletedTask(completedTask.Id);
-                            _completedTaskRepository.Save();
-                        }
-                    }
+                    AddRemoveCompletedTask(request.Done.Value, todoTask);
                     response.StatusCode = HttpStatusCode.Created;
                     response.Message = "Todo task is modified.";
                     response.Item = todoTask;
@@ -186,6 +173,61 @@ namespace TodoListApi.Controllers
                 StatusCode = HttpStatusCode.NotFound,
                 Message = "TodoList with specified ID wasn't found or it doesn't belong to the current user.",
             };
+        }
+
+        [HttpPut("{id}/MarkAsDone")]
+        public async Task<EntityHttpResponse<TodoTask>> MarkAsDone(string id,string todoListId,TodoTaskMarkAsDoneRequestBody request)
+        {   
+            ApplicationUser user = await _userManager.GetUserAsync(User);
+            TodoList todoList = _todoListRepository.GetTodoList(todoListId, user);
+            if(todoList != null)
+            {
+                TodoTask todoTask = _todoTaskRepository.GetTodoTask(id, todoList);
+                EntityHttpResponse<TodoTask> response = new Models.EntityHttpResponse<TodoTask>();
+                if (todoTask != null)
+                {
+                    try
+                    {
+                        if (request.Done == null)
+                        {
+                            return new EntityHttpResponse<TodoTask>() { StatusCode = HttpStatusCode.BadRequest, Message = "Bad request." };
+                        }
+                        bool isDone = request.Done.Value;
+                        _todoTaskRepository.UpdateTaskStatus(id, todoList, user, isDone);
+                        _todoTaskRepository.Save();
+                        AddRemoveCompletedTask(request.Done.Value, todoTask);
+
+                        response.StatusCode = HttpStatusCode.OK;
+                        response.Message = "TodoTask is updated.";
+                        response.Item = todoTask;
+                    }
+                    catch (Exception e)
+                    {
+                        response.StatusCode = HttpStatusCode.BadRequest;
+                        response.Message = e.Message;
+                    }
+                    return response;
+                }
+            }
+            return new EntityHttpResponse<TodoTask>() { StatusCode = HttpStatusCode.NotFound, Message = "The List doesn't exist." };
+        }
+
+        private void AddRemoveCompletedTask(bool isDone, TodoTask todoTask)
+        {
+            if (isDone == true)
+            {
+                _completedTaskRepository.AddCompletedTask(todoTask);
+                _completedTaskRepository.Save();
+            }
+            else
+            {
+                CompletedTaskUser completedTask = _completedTaskRepository.GetCompletedTaskByTodoTask(todoTask);
+                if (completedTask != null)
+                {
+                    _completedTaskRepository.DeleteCompletedTask(completedTask.Id);
+                    _completedTaskRepository.Save();
+                }
+            }
         }
 
         // DELETE api/<TodoTaskController>/5

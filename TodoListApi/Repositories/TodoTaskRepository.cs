@@ -112,7 +112,8 @@ namespace TodoListApi.Repositories
 
         public void UpdateTaskStatus(string id, TodoList todoList, ApplicationUser user, bool taskStatus)
         {
-            throw new NotImplementedException();
+            TodoTask task = this.GetTodoTask(id);
+            task.Done = taskStatus;
         }
     }
 }
