@@ -37,23 +37,51 @@ namespace TodoListApi.Controllers
 
         // GET: api/<TodoTaskController>
         [HttpGet]
-        public async Task<TasksListModel> Get(string todoListId,[FromQuery] int page = 1)
+        public async Task<TasksListModel> Get(string todoListId, [FromQuery] TasksListModel request)
         {
             ApplicationUser user = await _userManager.GetUserAsync(User);
             TodoList todoList = _todoListRepository.GetTodoListWithTasks(todoListId, user);
-            if (todoList != null) {
-               
-                TasksListModel listModel = new TasksListModel();
+            if (todoList != null)
+            {
+                List<TodoTask> tasks = todoList.Tasks;
+                TasksListModel listModel = request ?? new TasksListModel();
                 listModel.TodoListId = todoList.Id;
-                listModel.CurrentPage = page;
-                if(listModel.CurrentPage == 1) {
-                    listModel.Tasks = todoList.Tasks.Skip(0).Take(listModel.ItemsPerPage).ToList();
+
+                switch (listModel.FilterBy)
+                {
+                    case nameof(TasksListModelFilters.Deadline):
+                        try
+                        {
+                            DateTimeOffset filterDate = DateTimeOffset.Parse(listModel.FilterQuery);
+                            tasks = todoList.Tasks.Where(x => x.Deadline.Date == filterDate.Date).ToList();
+                        }
+                        catch (Exception e)
+                        {
+                            listModel.Errors.Add(e.Message);
+                        }
+                        break;
+                    case nameof(TasksListModelFilters.Done):
+                        try
+                        {
+                            bool isDone = bool.Parse(listModel.FilterQuery);
+                            tasks = todoList.Tasks.Where(x => x.Done == isDone).ToList();
+                        }
+                        catch (Exception e)
+                        {
+                            listModel.Errors.Add(e.Message);
+                        }
+                        break;
+                }
+
+                if (listModel.CurrentPage == 1)
+                {
+                    listModel.Tasks = tasks.Skip(0).Take(listModel.ItemsPerPage).ToList();
                 }
                 else
                 {
-                    listModel.Tasks = todoList.Tasks.Skip((listModel.CurrentPage-1) * listModel.ItemsPerPage).Take(listModel.ItemsPerPage).ToList();
+                    listModel.Tasks = tasks.Skip((listModel.CurrentPage - 1) * listModel.ItemsPerPage).Take(listModel.ItemsPerPage).ToList();
                 }
-                listModel.TotalPages = (int)Math.Ceiling(decimal.Divide(todoList.Tasks.Count,listModel.ItemsPerPage));
+                listModel.TotalPages = (int)Math.Ceiling(decimal.Divide(tasks.Count, listModel.ItemsPerPage));
                 return listModel;
             }
             return new TasksListModel();
@@ -61,18 +89,19 @@ namespace TodoListApi.Controllers
 
         // GET api/<TodoTaskController>/5
         [HttpGet("{id}")]
-        public async Task<EntityHttpResponse<TodoTask>> Get(string id,string todoListId)
+        public async Task<EntityHttpResponse<TodoTask>> Get(string id, string todoListId)
         {
             ApplicationUser user = await _userManager.GetUserAsync(User);
             TodoTask todoTask = _todoTaskRepository.GetTodoTask(id, _todoListRepository.GetTodoList(todoListId), user);
-            if(todoTask != null) { 
+            if (todoTask != null)
+            {
                 EntityHttpResponse<TodoTask> response = new EntityHttpResponse<TodoTask>();
                 response.StatusCode = HttpStatusCode.OK;
                 response.Item = todoTask;
                 return response;
             }
             return new EntityHttpResponse<TodoTask>() { StatusCode = HttpStatusCode.NotFound, Message = "Item not found" };
-        
+
         }
 
         // POST api/<TodoTaskController>
@@ -81,7 +110,7 @@ namespace TodoListApi.Controllers
         {
             ApplicationUser user = await _userManager.GetUserAsync(User);
             // check if todo list exists and does that list belongs to current user //
-                 TodoList todoList = _todoListRepository.GetTodoListWithTasks(todoListId, user);
+            TodoList todoList = _todoListRepository.GetTodoListWithTasks(todoListId, user);
             if (todoList != null)
             {
                 EntityHttpResponse<TodoTask> response = new EntityHttpResponse<TodoTask>();
@@ -89,7 +118,7 @@ namespace TodoListApi.Controllers
                 {
                     TodoTask todoTask = _todoTaskRepository.AddTodoTask(todoList, user, request);
                     _todoTaskRepository.Save();
-                    if(request.Done == true)
+                    if (request.Done == true)
                     {
                         _completedTaskRepository.AddCompletedTask(todoTask);
                     }
@@ -97,10 +126,10 @@ namespace TodoListApi.Controllers
                     response.Message = "Todo task is created.";
                     response.Item = todoTask;
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     response.StatusCode = HttpStatusCode.BadRequest;
-                    response.Message =e.Message;
+                    response.Message = e.Message;
                 }
                 return response;
 
@@ -134,7 +163,8 @@ namespace TodoListApi.Controllers
                     else
                     {
                         CompletedTaskUser completedTask = _completedTaskRepository.GetCompletedTaskByTodoTask(todoTask);
-                        if(completedTask!=null){
+                        if (completedTask != null)
+                        {
                             _completedTaskRepository.DeleteCompletedTask(completedTask.Id);
                             _completedTaskRepository.Save();
                         }
@@ -143,7 +173,7 @@ namespace TodoListApi.Controllers
                     response.Message = "Todo task is modified.";
                     response.Item = todoTask;
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     response.StatusCode = HttpStatusCode.BadRequest;
                     response.Message = e.Message;
@@ -176,7 +206,7 @@ namespace TodoListApi.Controllers
                     response.StatusCode = HttpStatusCode.OK;
                     response.Message = "TodoTask is deleted.";
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     response.StatusCode = HttpStatusCode.BadRequest;
                     response.Message = e.Message;
